@@ -5,20 +5,18 @@
  */
 
 #include "calculadora.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 
 
 void
 cal_prog_1(char *host)
 {
 	CLIENT *clnt;
-	int  *result_1;
-	operandos  suma_1_arg;
-	int  *result_2;
-	operandos  resta_1_arg;
-	int  *result_3;
-	operandos  multiplica_1_arg;
-	double  *result_4;
-	operandos  divide_1_arg;
+	operandos args;
+	int operacion;
+	int a, b;
 
 #ifndef	DEBUG
 	clnt = clnt_create (host, CAL_PROG, CAL_VERS, "udp");
@@ -28,22 +26,79 @@ cal_prog_1(char *host)
 	}
 #endif	/* DEBUG */
 
-	result_1 = suma_1(&suma_1_arg, clnt);
-	if (result_1 == (int *) NULL) {
-		clnt_perror (clnt, "call failed");
+	printf("=== CALCULADORA RPC ===\n");
+	printf("Operaciones disponibles:\n");
+	printf("1. Suma\n");
+	printf("2. Resta\n");
+	printf("3. Multiplicación\n");
+	printf("4. División\n");
+	printf("0. Salir\n\n");
+
+	while (1) {
+		printf("Selecciona operación (0-4): ");
+		scanf("%d", &operacion);
+		
+		if (operacion == 0) {
+			printf("Saliendo...\n");
+			break;
+		}
+		
+		if (operacion < 1 || operacion > 4) {
+			printf("Operación inválida. Intenta de nuevo.\n");
+			continue;
+		}
+		
+		printf("Ingresa el primer número: ");
+		scanf("%d", &a);
+		printf("Ingresa el segundo número: ");
+		scanf("%d", &b);
+		
+		args.a = a;
+		args.b = b;
+		
+		switch (operacion) {
+			case 1: {
+				int *result = suma_1(&args, clnt);
+				if (result == NULL) {
+					clnt_perror(clnt, "Error en suma");
+				} else {
+					printf("Resultado: %d + %d = %d\n", a, b, *result);
+				}
+				break;
+			}
+			case 2: {
+				int *result = resta_1(&args, clnt);
+				if (result == NULL) {
+					clnt_perror(clnt, "Error en resta");
+				} else {
+					printf("Resultado: %d - %d = %d\n", a, b, *result);
+				}
+				break;
+			}
+			case 3: {
+				int *result = multiplica_1(&args, clnt);
+				if (result == NULL) {
+					clnt_perror(clnt, "Error en multiplicación");
+				} else {
+					printf("Resultado: %d * %d = %d\n", a, b, *result);
+				}
+				break;
+			}
+			case 4: {
+				double *result = divide_1(&args, clnt);
+				if (result == NULL) {
+					clnt_perror(clnt, "Error en división");
+				} else if (isnan(*result)) {
+					printf("Error: División por cero\n");
+				} else {
+					printf("Resultado: %d / %d = %.2f\n", a, b, *result);
+				}
+				break;
+			}
+		}
+		printf("\n");
 	}
-	result_2 = resta_1(&resta_1_arg, clnt);
-	if (result_2 == (int *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-	result_3 = multiplica_1(&multiplica_1_arg, clnt);
-	if (result_3 == (int *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-	result_4 = divide_1(&divide_1_arg, clnt);
-	if (result_4 == (double *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
+
 #ifndef	DEBUG
 	clnt_destroy (clnt);
 #endif	 /* DEBUG */
