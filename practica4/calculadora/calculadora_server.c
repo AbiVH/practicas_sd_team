@@ -5,15 +5,14 @@
  */
 
 #include "calculadora.h"
+#include <math.h>
 
 int *
 suma_1_svc(operandos *argp, struct svc_req *rqstp)
 {
 	static int  result;
 
-	/*
-	 * insert server code here
-	 */
+	result = argp->a + argp->b;
 
 	return &result;
 }
@@ -23,9 +22,7 @@ resta_1_svc(operandos *argp, struct svc_req *rqstp)
 {
 	static int  result;
 
-	/*
-	 * insert server code here
-	 */
+	result = argp->a - argp->b;
 
 	return &result;
 }
@@ -35,9 +32,7 @@ multiplica_1_svc(operandos *argp, struct svc_req *rqstp)
 {
 	static int  result;
 
-	/*
-	 * insert server code here
-	 */
+	result = argp->a * argp->b;
 
 	return &result;
 }
@@ -47,9 +42,11 @@ divide_1_svc(operandos *argp, struct svc_req *rqstp)
 {
 	static double  result;
 
-	/*
-	 * insert server code here
-	 */
+	if (argp->b == 0) {
+		result = NAN;
+	} else {
+		result = (double)argp->a / (double)argp->b;
+	}
 
 	return &result;
 }
